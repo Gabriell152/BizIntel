@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BizIntel Pro – Dashboard de Inteligencia de Negocios para PyMEs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-deep:    #070C1A;
+    --bg-card:    #0E1829;
+    --bg-section: #0A1220;
+    --accent:     #3B82F6;
+    --accent2:    #06B6D4;
+    --accent3:    #8B5CF6;
+    --success:    #10B981;
+    --danger:     #EF4444;
+    --text:       #F1F5F9;
+    --muted:      #94A3B8;
+    --border:     rgba(59,130,246,0.18);
+    --glow:       0 0 40px rgba(59,130,246,0.18);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-deep);
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 5%; height: 64px;
+    background: rgba(7,12,26,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.3s;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em;
+  }
+  .nav-logo .dot {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 900; color: #fff;
+  }
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none; font-size: 0.875rem;
+    font-weight: 500; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--accent); color: #fff; border: none;
+    padding: 8px 20px; border-radius: 8px; font-size: 0.875rem;
+    font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh; padding: 120px 5% 80px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative; overflow: hidden; text-align: center;
+  }
+  #hero-canvas {
+    position: absolute; inset: 0; z-index: 0; opacity: 0.5;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3);
+    color: var(--accent); padding: 6px 14px; border-radius: 99px;
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; margin-bottom: 28px;
+    position: relative; z-index: 1;
+  }
+  .hero-badge span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+
+  h1.hero-title {
+    font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+    font-weight: 900; line-height: 1.1; letter-spacing: -0.04em;
+    max-width: 820px; margin-bottom: 20px;
+    position: relative; z-index: 1;
+  }
+  h1.hero-title .grad {
+    background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero-sub {
+    font-size: clamp(1rem, 1.5vw, 1.2rem); color: var(--muted);
+    max-width: 580px; line-height: 1.7; margin-bottom: 40px;
+    position: relative; z-index: 1;
+  }
+  .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; position: relative; z-index: 1; margin-bottom: 72px; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #2563EB);
+    color: #fff; border: none; padding: 14px 32px;
+    border-radius: 10px; font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 24px rgba(59,130,246,0.35);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 36px rgba(59,130,246,0.5); }
+  .btn-secondary {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border); padding: 14px 32px;
+    border-radius: 10px; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); background: rgba(59,130,246,0.08); }
+
+  /* ── DASHBOARD PREVIEW (hero) ── */
+  .dashboard-preview {
+    width: 100%; max-width: 900px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6), var(--glow);
+    position: relative; z-index: 1;
+  }
+  .dash-topbar {
+    display: flex; align-items: center; gap: 8px; padding: 14px 20px;
+    background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border);
+  }
+  .dash-topbar .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dt-red{background:#FF5F57;} .dt-yellow{background:#FEBC2E;} .dt-green{background:#28C840;}
+  .dash-topbar .title { margin-left: 8px; font-size: 0.8rem; color: var(--muted); font-weight: 500; }
+  .dash-body { padding: 20px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 18px; }
+  .kpi-card {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .kpi-label { font-size: 0.7rem; color: var(--muted); font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .kpi-value { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; }
+  .kpi-delta { font-size: 0.72rem; margin-top: 4px; font-weight: 600; }
+  .pos{color:var(--success);} .neg{color:var(--danger);}
+
+  .chart-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 12px; }
+  .chart-box {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; height: 130px; position: relative; overflow: hidden;
+  }
+  .chart-title { font-size: 0.72rem; font-weight: 600; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .chart-svg { width: 100%; height: 90px; }
+  .donut-wrap { display: flex; align-items: center; justify-content: center; height: 100%; }
+
+  /* ── SECTION BASE ── */
+  section { padding: 100px 5%; }
+  .section-eyebrow {
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2);
+    margin-bottom: 12px; display: block;
+  }
+  h2.section-title {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 800; letter-spacing: -0.03em; line-height: 1.15;
+    max-width: 640px; margin-bottom: 16px;
+  }
+  .section-sub {
+    color: var(--muted); font-size: 1.05rem; line-height: 1.75;
+    max-width: 560px; margin-bottom: 56px;
+  }
+
+  /* ── STATS BAND ── */
+  #stats {
+    padding: 60px 5%; background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(6,182,212,0.06));
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 40px; max-width: 900px; margin: 0 auto; text-align: center; }
+  .stat-num { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.04em; line-height: 1; }
+  .stat-num.c1{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .stat-num.c2{background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .stat-num.c3{background:linear-gradient(135deg,var(--accent3),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .stat-num.c4{background:linear-gradient(135deg,var(--success),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .stat-label { font-size: 0.85rem; color: var(--muted); margin-top: 6px; font-weight: 500; }
+
+  /* ── FEATURES ── */
+  #features { background: var(--bg-section); }
+  .feat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+  .feat-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 28px;
+    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+    opacity: 0; transform: translateY(24px);
+  }
+  .feat-card.visible { opacity:1; transform:translateY(0); transition: opacity 0.55s ease, transform 0.55s ease, border-color 0.25s, box-shadow 0.25s; }
+  .feat-card:hover { border-color: var(--accent); box-shadow: 0 0 30px rgba(59,130,246,0.12); transform: translateY(-3px); }
+  .feat-icon {
+    width: 44px; height: 44px; border-radius: 10px; margin-bottom: 18px;
+    display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+  }
+  .feat-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+  .feat-card p { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+
+  /* ── HOW IT WORKS ── */
+  #how { background: var(--bg-deep); }
+  .steps { display: flex; flex-direction: column; gap: 0; max-width: 700px; }
+  .step {
+    display: flex; gap: 28px; padding: 36px 0;
+    border-bottom: 1px solid var(--border); position: relative;
+    opacity: 0; transform: translateX(-20px);
+  }
+  .step.visible { opacity:1; transform:translateX(0); transition: opacity 0.5s ease, transform 0.5s ease; }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    flex-shrink: 0; width: 44px; height: 44px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: 800; color: #fff;
+  }
+  .step-content h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
+  .step-content p { font-size: 0.9rem; color: var(--muted); line-height: 1.7; }
+
+  /* ── MODULES ── */
+  #modules { background: var(--bg-section); }
+  .modules-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+  .mod-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px 24px;
+    display: flex; align-items: flex-start; gap: 16px;
+    transition: border-color 0.2s;
+    opacity: 0; transform: translateY(16px);
+  }
+  .mod-card.visible { opacity:1; transform:translateY(0); transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.2s; }
+  .mod-card:hover { border-color: rgba(6,182,212,0.4); }
+  .mod-icon { font-size: 1.6rem; flex-shrink: 0; line-height: 1; }
+  .mod-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+  .mod-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── IOT HIGHLIGHT ── */
+  #iot {
+    background: var(--bg-deep);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+  }
+  .iot-visual {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 36px; text-align: center;
+    box-shadow: var(--glow); position: relative; overflow: hidden;
+  }
+  .iot-visual::before {
+    content:''; position:absolute; inset:-40px;
+    background: radial-gradient(circle at 50% 50%, rgba(6,182,212,0.08), transparent 70%);
+    pointer-events: none;
+  }
+  .nfc-ring {
+    width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 20px;
+    border: 2px solid rgba(6,182,212,0.4); position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nfc-ring::before, .nfc-ring::after {
+    content:''; position:absolute; border-radius:50%;
+    border: 2px solid rgba(6,182,212,0.2); animation: sonar 2s infinite;
+  }
+  .nfc-ring::before { width:150px; height:150px; animation-delay: 0.5s; }
+  .nfc-ring::after  { width:190px; height:190px; animation-delay: 1s; }
+  @keyframes sonar {
+    0% { transform:scale(0.8); opacity:0.8; }
+    100% { transform:scale(1.2); opacity:0; }
+  }
+  .nfc-inner { font-size: 3rem; }
+  .iot-log {
+    background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px; margin-top: 20px; text-align: left;
+    font-family: 'Courier New', monospace; font-size: 0.75rem;
+  }
+  .log-line { color: var(--muted); margin-bottom: 4px; }
+  .log-line .ok { color: var(--success); }
+  .log-line .key { color: var(--accent2); }
+  .iot-text h2 { font-size: clamp(1.6rem, 2.8vw, 2.2rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 16px; }
+  .iot-text p { color: var(--muted); line-height: 1.75; margin-bottom: 24px; }
+  .iot-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3);
+    color: var(--accent2); padding: 8px 16px; border-radius: 99px;
+    font-size: 0.82rem; font-weight: 600; margin: 4px 4px 4px 0;
+  }
+
+  /* ── TECH STACK ── */
+  #tech { background: var(--bg-section); text-align: center; }
+  .tech-row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 40px; }
+  .tech-badge {
+    background: var(--bg-card); border: 1px solid var(--border);
+    padding: 10px 20px; border-radius: 99px; font-size: 0.85rem; font-weight: 600;
+    display: flex; align-items: center; gap: 8px; transition: border-color 0.2s;
+  }
+  .tech-badge:hover { border-color: var(--accent); }
+  .tech-badge .em { font-size: 1.1rem; }
+
+  /* ── CTA ── */
+  #cta {
+    background: var(--bg-deep); text-align: center;
+    padding: 120px 5%;
+    background-image: radial-gradient(ellipse at 50% 50%, rgba(59,130,246,0.08) 0%, transparent 70%);
+  }
+  #cta h2 { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 900; letter-spacing: -0.04em; margin-bottom: 16px; }
+  #cta p { color: var(--muted); font-size: 1.1rem; max-width: 520px; margin: 0 auto 40px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg-card);
+    border-top: 1px solid transparent;
+    border-image: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent) 1;
+    padding: 60px 5% 0;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.4fr;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+  }
+  .footer-brand .nav-logo { margin-bottom: 14px; }
+  .footer-brand p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 320px;
+    margin-bottom: 20px;
+  }
+  .footer-col h4 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    margin-bottom: 18px;
+  }
+  .footer-col a {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-decoration: none;
+    margin-bottom: 10px;
+    transition: color 0.2s;
+  }
+  .footer-col a:hover { color: var(--accent); }
+  .footer-bottom {
+    border-top: 1px solid var(--border);
+    padding: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .footer-bottom .copy {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .footer-bottom-links {
+    display: flex;
+    gap: 20px;
+  }
+  .footer-bottom-links a {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-bottom-links a:hover { color: var(--accent); }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    .kpi-row { grid-template-columns: repeat(2,1fr); }
+    .chart-row { grid-template-columns: 1fr; }
+    .feat-grid { grid-template-columns: 1fr; }
+    .modules-grid { grid-template-columns: 1fr; }
+    #iot { grid-template-columns: 1fr; gap: 40px; }
+    .stats-grid { grid-template-columns: repeat(2,1fr); }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="dot">BI</div>
+    BizIntel Pro
+  </div>
+  <div class="nav-links">
+    <a href="#features">Características</a>
+    <a href="#modules">Módulos</a>
+    <a href="#iot">IoT</a>
+    <a href="#tech">Tecnología</a>
+  </div>
+ <!-- <button class="nav-cta">Solicitar Demo</button>-->
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+
+ <!-- <div class="hero-badge">
+    <span></span> Sistema listo para producción — Enero 2026
+  </div>-->
+
+  <h1 class="hero-title">
+    Inteligencia de negocios<br><span class="grad">al alcance de tu PyME</span>
+  </h1>
+  <p class="hero-sub">
+    Centraliza ventas, inventario, finanzas y recursos humanos en un solo dashboard. 
+    Decisiones más inteligentes, respaldadas por tus propios datos en tiempo real.
+  </p>
+  <div class="hero-btns">
+    <a href="bizintel-demo.html" class="btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;">Ver Demo en Vivo ↗</a>
+    <button class="btn-secondary">Explorar Módulos</button>
+  </div>
+
+  <!-- Mini Dashboard Preview -->
+  <div class="dashboard-preview">
+    <div class="dash-topbar">
+      <div class="dot dt-red"></div>
+      <div class="dot dt-yellow"></div>
+      <div class="dot dt-green"></div>
+      <span class="title">BizIntel Pro — Dashboard Principal</span>
+    </div>
+    <div class="dash-body">
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Ingresos Totales</div>
+          <div class="kpi-value" id="kpi1" style="color:#3B82F6">$0</div>
+          <div class="kpi-delta pos">↑ 12.4% vs mes ant.</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Gastos Operativos</div>
+          <div class="kpi-value" id="kpi2" style="color:#06B6D4">$0</div>
+          <div class="kpi-delta neg">↑ 3.1% vs mes ant.</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Beneficio Neto</div>
+          <div class="kpi-value" id="kpi3" style="color:#10B981">$0</div>
+          <div class="kpi-delta pos">↑ 8.7% vs mes ant.</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Empleados Activos</div>
+          <div class="kpi-value" id="kpi4" style="color:#8B5CF6">0</div>
+          <div class="kpi-delta pos">↑ 2 incorporaciones</div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-box">
+          <div class="chart-title">Ingresos vs Gastos (Últimos 6 meses)</div>
+          <svg class="chart-svg" viewBox="0 0 400 80" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="gIncome" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.4"/>
+                <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="gExpense" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#EF4444" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#EF4444" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,60 Q60,40 80,30 Q120,15 160,20 Q200,25 240,10 Q280,2 320,8 Q360,14 400,5 L400,80 L0,80Z" fill="url(#gIncome)"/>
+            <path d="M0,60 Q60,40 80,30 Q120,15 160,20 Q200,25 240,10 Q280,2 320,8 Q360,14 400,5" fill="none" stroke="#3B82F6" stroke-width="2"/>
+            <path d="M0,70 Q60,55 80,52 Q120,48 160,50 Q200,48 240,42 Q280,38 320,40 Q360,42 400,36 L400,80 L0,80Z" fill="url(#gExpense)"/>
+            <path d="M0,70 Q60,55 80,52 Q120,48 160,50 Q200,48 240,42 Q280,38 320,40 Q360,42 400,36" fill="none" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="4,2"/>
+          </svg>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">Distribución de Gastos</div>
+          <div class="donut-wrap">
+            <svg viewBox="0 0 100 100" width="90" height="90">
+              <circle cx="50" cy="50" r="36" fill="none" stroke="#3B82F6" stroke-width="18" stroke-dasharray="142 83" stroke-dashoffset="25" transform="rotate(-90 50 50)"/>
+              <circle cx="50" cy="50" r="36" fill="none" stroke="#06B6D4" stroke-width="18" stroke-dasharray="56 169" stroke-dashoffset="-117" transform="rotate(-90 50 50)"/>
+              <circle cx="50" cy="50" r="36" fill="none" stroke="#8B5CF6" stroke-width="18" stroke-dasharray="27 198" stroke-dashoffset="-173" transform="rotate(-90 50 50)"/>
+              <text x="50" y="55" text-anchor="middle" fill="white" font-size="11" font-weight="700" font-family="Inter">62%</text>
+            </svg>
+            <div style="margin-left:14px;font-size:0.68rem;color:var(--muted);">
+              <div style="margin-bottom:4px;"><span style="color:#3B82F6">●</span> Inventario 62%</div>
+              <div style="margin-bottom:4px;"><span style="color:#06B6D4">●</span> Nómina 25%</div>
+              <div><span style="color:#8B5CF6">●</span> Alquiler 13%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="stats-grid">
+    <div>
+      <div class="stat-num c1" data-target="7" data-suffix=" Sprints">0</div>
+      <div class="stat-label">de desarrollo ágil completados</div>
+    </div>
+    <div>
+      <div class="stat-num c2" data-target="5" data-suffix=" Módulos">0</div>
+      <div class="stat-label">áreas del negocio integradas</div>
+    </div>
+    <div>
+      <div class="stat-num c3" data-target="300" data-suffix="ms">&lt;0</div>
+      <div class="stat-label">tiempo de respuesta del backend</div>
+    </div>
+    <div>
+      <div class="stat-num c4" data-target="100" data-suffix="%" >0</div>
+      <div class="stat-label">pruebas funcionales aprobadas</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div style="text-align:center; max-width:640px; margin:0 auto;">
+    <span class="section-eyebrow reveal">¿Por qué BizIntel Pro?</span>
+    <h2 class="section-title reveal" style="max-width:100%">Una plataforma. Todo tu negocio.</h2>
+    <p class="section-sub reveal" style="max-width:100%; margin-bottom:56px;">
+      Diseñada para eliminar el caos de datos dispersos en múltiples herramientas, 
+      con tecnología de nivel empresarial adaptada al tamaño de tu PyME.
+    </p>
+  </div>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(59,130,246,0.15);">📊</div>
+      <h3>Dashboards en Tiempo Real</h3>
+      <p>Indicadores KPI actualizados al instante. Gráficos interactivos de ingresos, gastos y rendimiento con datos reales de tu negocio.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(6,182,212,0.15);">🔗</div>
+      <h3>Todo conectado, nada repetido</h3>
+      <p>Ventas, inventario, personal y finanzas comparten la misma información. Registras algo una sola vez y el resto se actualiza solo.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(139,92,246,0.15);">📡</div>
+      <h3>Control de Asistencia IoT</h3>
+      <p>Registro automático de entrada y salida mediante lector NFC. Nómina precisa sin intervención manual.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(16,185,129,0.15);">🔐</div>
+      <h3>Cada quien ve solo lo que le corresponde</h3>
+      <p>Acceso protegido con contraseña, comunicaciones cifradas y permisos configurables: el gerente ve todo, el vendedor solo sus ventas.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(239,68,68,0.15);">⚡</div>
+      <h3>Velocidad que no se nota porque nunca falla</h3>
+      <p>El sistema responde en menos de un tercio de segundo. Diseñado para crecer con tu negocio sin volverse lento ni inestable.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(251,191,36,0.15);">📄</div>
+      <h3>Reportes Exportables</h3>
+      <p>Genera informes en PDF y Excel para ventas, inventario y recursos humanos con un clic, listos para presentar.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <span class="section-eyebrow reveal">Paso a Paso</span>
+  <h2 class="section-title reveal">Cómo funciona BizIntel Pro</h2>
+  <p class="section-sub reveal">Del registro al resultado, todo sucede solo. Tú solo tienes que mirar los números y tomar decisiones.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <h3>La información entra sola, sin trabajo extra</h3>
+        <p>Los empleados registran su entrada y salida acercando una tarjeta, sin necesidad de firmar listas ni usar controles manuales. Las ventas y movimientos de inventario también se registran al instante desde la plataforma web.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <h3>El sistema organiza y guarda todo automáticamente</h3>
+        <p>Cada dato ingresado es verificado y procesado de inmediato. La información se guarda de forma segura y ordenada, garantizando que no se pierda nada y que todos los módulos estén siempre sincronizados.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <h3>Todo se ve claro en tu pantalla</h3>
+        <p>Los datos se convierten automáticamente en gráficos simples, tablas y resúmenes visuales. El dueño o administrador ve el estado real del negocio en cualquier momento, desde cualquier dispositivo.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <h3>Decide con confianza, no con suposiciones</h3>
+        <p>Con toda la información reunida en un solo lugar, puedes ver de un vistazo qué se vende más, qué productos se están agotando, qué empleados faltaron y cómo va la caja. Sin revisar papeles ni cruzar archivos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULES -->
+<section id="modules">
+  <span class="section-eyebrow reveal">Cobertura Integral</span>
+  <h2 class="section-title reveal">Todos los módulos que tu empresa necesita</h2>
+  <p class="section-sub reveal">Cada área del negocio conectada y sincronizada en una sola plataforma.</p>
+  <div class="modules-grid">
+    <div class="mod-card">
+      <div class="mod-icon">💰</div>
+      <div>
+        <h4>Gestión de Ventas</h4>
+        <p>Registro de transacciones, historial completo, reportes mensuales y anuales. Indicadores de rendimiento comercial integrados al dashboard.</p>
+      </div>
+    </div>
+    <div class="mod-card">
+      <div class="mod-icon">📦</div>
+      <div>
+        <h4>Control de Inventario</h4>
+        <p>Actualización en tiempo real de existencias, trazabilidad de movimientos, alertas automáticas de stock bajo y reportes de inventario.</p>
+      </div>
+    </div>
+    <div class="mod-card">
+      <div class="mod-icon">👥</div>
+      <div>
+        <h4>Recursos Humanos</h4>
+        <p>Gestión de empleados, control de asistencia con IoT, cálculo automático de nómina y análisis de rendimiento laboral por departamento.</p>
+      </div>
+    </div>
+    <div class="mod-card">
+      <div class="mod-icon">📈</div>
+      <div>
+        <h4>Gestión Financiera</h4>
+        <p>Registro de ingresos y egresos, cálculo de balances, desglose de gastos por categoría y métricas de rentabilidad del negocio.</p>
+      </div>
+    </div>
+    <div class="mod-card">
+      <div class="mod-icon">📡</div>
+      <div>
+        <h4>Control de Asistencia Automático</h4>
+        <p>Cada empleado tiene una tarjeta personal. La acerca al dispositivo y queda registrado al instante. Sin firmas, sin fraudes, sin errores.</p>
+      </div>
+    </div>
+    <div class="mod-card">
+      <div class="mod-icon">🗂️</div>
+      <div>
+        <h4>Proyectos y Tareas</h4>
+        <p>Seguimiento de proyectos internos, asignación de tareas a empleados, estados de avance y fechas de vencimiento para una gestión organizada.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IOT HIGHLIGHT -->
+<section id="iot">
+  <div class="iot-visual">
+    <div class="nfc-ring">
+      <div class="nfc-inner">📶</div>
+    </div>
+    <p style="font-size:1rem; font-weight:700; margin-bottom:4px;">Lector NFC Activo</p>
+    <p style="font-size:0.82rem; color:var(--muted); margin-bottom:20px;">Esperando tarjeta del empleado...</p>
+    <div class="iot-log" id="iot-log">
+      <div class="log-line"><span class="key">[08:14:55]</span> Sistema iniciado. Esperando lectura NFC...</div>
+      <div class="log-line"><span class="key">[08:15:32]</span> UID detectado: <span class="ok">A1B2C3D4</span></div>
+      <div class="log-line"><span class="key">[08:15:32]</span> POST /scan-nfc → <span class="ok">201 Created</span></div>
+      <div class="log-line"><span class="key">[08:15:32]</span> Empleado: García, Luis — <span class="ok">Entrada registrada ✓</span></div>
+    </div>
+  </div>
+
+  <div class="iot-text">
+    <span class="section-eyebrow">Control de Asistencia Sin Papel</span>
+    <h2>El empleado acerca su tarjeta y listo</h2>
+    <p>
+      BizIntel Pro incluye un pequeño dispositivo físico instalado en la entrada de tu negocio. 
+      Cada empleado tiene una tarjeta personal: la acerca, y el sistema registra su llegada o salida 
+      al instante. Sin listas en papel. Sin errores. Sin suplantaciones.
+    </p>
+    <p>
+      El área de Recursos Humanos recibe esos registros de forma automática y calcula 
+      la nómina sin intervención manual, ahorrando horas de trabajo administrativo cada semana.
+    </p>
+    <div>
+      <span class="iot-pill">⚡ Dispositivo compacto y económico</span>
+      <span class="iot-pill">📶 Tarjetas de proximidad NFC</span>
+      <span class="iot-pill">🔄 Sin pérdida de datos ante fallos</span>
+      <span class="iot-pill">🔐 Acceso seguro y protegido</span>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section id="tech">
+  <span class="section-eyebrow reveal">Detrás del Sistema</span>
+  <h2 class="section-title reveal" style="max-width:100%; margin:0 auto 12px;">Sólido, rápido y siempre disponible</h2>
+  <p class="section-sub reveal" style="max-width:540px; margin:0 auto 0;">
+    BizIntel Pro fue construido con herramientas profesionales de última generación, 
+    pensadas para que el sistema nunca te falle cuando más lo necesitas.
+  </p>
+  <div class="tech-row reveal">
+    <div class="tech-badge"><span class="em">⚡</span> Motor de alto rendimiento</div>
+    <div class="tech-badge"><span class="em">🗄️</span> Base de datos robusta</div>
+    <div class="tech-badge"><span class="em">🖥️</span> Interfaz web moderna</div>
+    <div class="tech-badge"><span class="em">📡</span> Dispositivo de asistencia físico</div>
+    <div class="tech-badge"><span class="em">🔐</span> Acceso seguro por usuario</div>
+    <div class="tech-badge"><span class="em">📊</span> Gráficos interactivos</div>
+    <div class="tech-badge"><span class="em">🔄</span> Actualizaciones en tiempo real</div>
+    <div class="tech-badge"><span class="em">📄</span> Exportación a PDF y Excel</div>
+    <div class="tech-badge"><span class="em">📶</span> Tarjetas de acceso NFC</div>
+    <div class="tech-badge"><span class="em">☁️</span> Listo para la nube</div>
+  </div>
+
+  <!-- Architecture diagram -->
+  <div style="margin-top:64px; background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:36px; max-width:820px; margin-left:auto; margin-right:auto;" class="reveal">
+    <p style="font-size:0.78rem; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:24px;">Así fluye la información en BizIntel Pro</p>
+    <div style="display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;">
+      <div style="text-align:center; padding:16px 20px; background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.3); border-radius:10px; min-width:110px;">
+        <div style="font-size:1.5rem; margin-bottom:6px;">📶</div>
+        <div style="font-size:0.72rem; font-weight:700;">Tarjeta NFC</div>
+        <div style="font-size:0.65rem; color:var(--muted);">Registro físico</div>
+      </div>
+      <div style="color:var(--accent2); font-size:1.4rem; padding:0 10px;">→</div>
+      <div style="text-align:center; padding:16px 20px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.3); border-radius:10px; min-width:110px;">
+        <div style="font-size:1.5rem; margin-bottom:6px;">⚙️</div>
+        <div style="font-size:0.72rem; font-weight:700;">Motor Central</div>
+        <div style="font-size:0.65rem; color:var(--muted);">Procesa y valida</div>
+      </div>
+      <div style="color:var(--accent2); font-size:1.4rem; padding:0 10px;">⇄</div>
+      <div style="text-align:center; padding:16px 20px; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.3); border-radius:10px; min-width:110px;">
+        <div style="font-size:1.5rem; margin-bottom:6px;">🗄️</div>
+        <div style="font-size:0.72rem; font-weight:700;">Almacenamiento</div>
+        <div style="font-size:0.65rem; color:var(--muted);">Seguro y ordenado</div>
+      </div>
+      <div style="color:var(--accent2); font-size:1.4rem; padding:0 10px;">⇄</div>
+      <div style="text-align:center; padding:16px 20px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:10px; min-width:110px;">
+        <div style="font-size:1.5rem; margin-bottom:6px;">📊</div>
+        <div style="font-size:0.72rem; font-weight:700;">Tu Dashboard</div>
+        <div style="font-size:0.65rem; color:var(--muted);">Lo ves en pantalla</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <span class="section-eyebrow reveal" style="display:block; margin-bottom:12px;">¿Listo para transformar tu PyME?</span>
+  <h2 class="reveal">Tu negocio merece <span style="background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">datos inteligentes</span></h2>
+  <p class="reveal">BizIntel Pro está listo para implementarse. Centraliza tu información, automatiza tus procesos y toma decisiones con confianza.</p>
+  <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;" class="reveal">
+    <button class="btn-primary" style="font-size:1rem; padding:16px 36px;">Solicitar Demostración</button>
+    <button class="btn-secondary" style="font-size:1rem; padding:16px 36px;">Ver Documentación</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="nav-logo" style="margin-bottom:14px;">
+        <div class="dot">BI</div> BizIntel Pro
+      </div>
+      <p>BizIntel Pro centraliza ventas, inventario, finanzas y recursos humanos en un solo dashboard de inteligencia empresarial para PyMEs.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Plataforma</h4>
+      <a href="#features">Características</a>
+      <a href="#modules">Módulos</a>
+      <a href="#iot">Control IoT</a>
+      <a href="#tech">Tecnología</a>
+    </div>
+    <div class="footer-col">
+      <h4>Recursos</h4>
+      <a href="#">Documentación</a>
+      <a href="#">API</a>
+      <a href="#">Blog</a>
+      <a href="#">Soporte</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <a href="mailto:contacto@bizintelpro.com">contacto@bizintelpro.com</a>
+      <a href="#">Soporte</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="copy">© 2026 BizIntel Pro. Todos los derechos reservados. Desarrollado por Gabriel Núñez</div>
+    <div class="footer-bottom-links">
+      <a href="#">Política de Privacidad</a>
+      <a href="#">Términos de Uso</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── CANVAS PARTICLES ──
+const canvas = document.getElementById('hero-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 1.5 + 0.3;
+    this.speedX = (Math.random() - 0.5) * 0.4;
+    this.speedY = (Math.random() - 0.5) * 0.4;
+    this.opacity = Math.random() * 0.6 + 0.1;
+    this.color = Math.random() > 0.5 ? '59,130,246' : '6,182,212';
+  }
+  update() {
+    this.x += this.speedX; this.y += this.speedY;
+    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${this.color},${this.opacity})`;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < 120; i++) particles.push(new Particle());
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Draw connections
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 80) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(59,130,246,${0.06 * (1 - dist/80)})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ── KPI COUNTER ANIMATION ──
+function animateCounter(el, target, prefix, suffix, decimals=0) {
+  const duration = 2000;
+  const start = performance.now();
+  function update(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = target * eased;
+    el.textContent = prefix + (decimals > 0 ? current.toFixed(decimals) : Math.floor(current).toLocaleString()) + suffix;
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+setTimeout(() => {
+  animateCounter(document.getElementById('kpi1'), 48320, '$', '', 0);
+  animateCounter(document.getElementById('kpi2'), 31540, '$', '', 0);
+  animateCounter(document.getElementById('kpi3'), 16780, '$', '', 0);
+  animateCounter(document.getElementById('kpi4'), 24, '', '', 0);
+}, 600);
+
+// ── STATS COUNTERS (scroll-triggered) ──
+const statEls = document.querySelectorAll('.stat-num[data-target]');
+const statsObs = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const target = parseFloat(el.dataset.target);
+      const suffix = el.dataset.suffix || '';
+      const prefix = el.textContent.startsWith('<') ? '<' : '';
+      animateCounter(el, target, prefix, suffix, 0);
+      statsObs.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+statEls.forEach(el => statsObs.observe(el));
+
+// ── SCROLL REVEAL ──
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) { entry.target.classList.add('visible'); }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal, .feat-card, .step, .mod-card').forEach(el => revealObs.observe(el));
+
+// ── IOT LOG ANIMATION ──
+const logMessages = [
+  '[09:02:11] UID detectado: <span class="ok">F3A1BE22</span>',
+  '[09:02:11] POST /scan-nfc → <span class="ok">201 Created</span>',
+  '[09:02:11] Empleado: Martínez, Ana — <span class="ok">Entrada ✓</span>',
+  '[09:15:40] UID detectado: <span class="ok">D7C4901E</span>',
+  '[09:15:40] Empleado: Rodríguez, Carlos — <span class="ok">Entrada ✓</span>',
+  '[12:01:02] UID detectado: <span class="ok">A1B2C3D4</span>',
+  '[12:01:02] Empleado: García, Luis — <span class="ok">Salida ✓</span>',
+];
+const logEl = document.getElementById('iot-log');
+let logIdx = 0;
+setInterval(() => {
+  const div = document.createElement('div');
+  div.className = 'log-line';
+  div.innerHTML = '<span class="key">' + logMessages[logIdx % logMessages.length].split(']')[0] + ']</span> ' + logMessages[logIdx % logMessages.length].split('] ')[1];
+  logEl.appendChild(div);
+  logEl.scrollTop = logEl.scrollHeight;
+  if (logEl.children.length > 8) logEl.removeChild(logEl.firstChild);
+  logIdx++;
+}, 3500);
+
+// ── FEAT CARDS STAGGERED ──
+const featCards = document.querySelectorAll('.feat-card');
+const featObs = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      featObs.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+featCards.forEach(c => featObs.observe(c));
+
+// ── MOD CARDS STAGGERED ──
+const modCards = document.querySelectorAll('.mod-card');
+const modObs = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 70);
+      modObs.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+modCards.forEach(c => modObs.observe(c));
+
+// ── STEPS STAGGERED ──
+const steps = document.querySelectorAll('.step');
+const stepObs = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 100);
+      stepObs.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+steps.forEach(s => stepObs.observe(s));
+</script>
+</body>
+</html>
